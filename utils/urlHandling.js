@@ -4,14 +4,21 @@ function thumbUrlToImgSrc(thumbUrl){
   return url+suffix;
 }
 
-function cssUrlToImgSrc(cssUrl){
-  let result = cssUrl.match(/\/\/ci\.xiaohongshu\.com\/[^;)]+/);
+function cssUrlToImgSrc(cssUrl,matchRegExp){
+  let result = cssUrl.match(matchRegExp);
   if(result && result[0]){
     return 'https:'+result[0]
+  }else{
+    throw new Error('Nothing matches the regular expression.')
   }
+}
+
+function appendBaseUrl(partialUrl,baseUrl){
+  return baseUrl + partialUrl;
 }
 
 module.exports = {
   thumbUrlToImgSrc,
-  cssUrlToImgSrc
+  cssUrlToImgSrc,
+  appendBaseUrl
 }

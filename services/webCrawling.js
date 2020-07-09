@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 
 const HTTPError = require('../errors/HTTPError');
 
-const {cssUrlToImgSrc} = require('../utils/urlHandling');
+const {cssUrlToImgSrc,appendBaseUrl} = require('../utils/urlHandling');
 
 async function scrapeUGCItemFromXHS(itemId){
   const url = `https://www.xiaohongshu.com/discovery/item/${itemId}`;
@@ -22,11 +22,16 @@ async function scrapeUGCItemFromXHS(itemId){
   const noteContent = $('.note-top + div .content').html();
   const stats = $('.bottom-gap-add .operation-block').text().split(' ').filter( i => i.length !== 0);
   const postedDate = $('.bottom-gap-add .publish-date').text().match(/\d+-\d+-\d+\s\d+\:\d+/);
-  // console.log(stats,'------',postedDate);
+  const tagField = $('.panel-card-wrap .keywords').children();
+  let tags = [];
+  if(tagField.length){
+    for(let i=0;i < tagField.length; i++){
+      tags.push({name:$(tagField[i]).text().trim(), href:appendBaseUrl($(tagField[i]).attr('href'),'https://www.xiaohongshu.com')});
+    }
+  }
 
   const videoSrc = $('.videoframe video').attr('src');
   const pics = $('.carousel .slide').children();
-  // console.log(videoSrc);
   let imageSrc;
   if(!videoSrc && pics.length){
     // the post has images and not video
@@ -34,7 +39,7 @@ async function scrapeUGCItemFromXHS(itemId){
     for(let i=0;i < pics.length; i++){
       let s = $(pics[i]).children().attr('style');
       if(s){
-        imageSrc.push(cssUrlToImgSrc(s))
+        imageSrc.push(cssUrlToImgSrc(s,/\/\/ci\.xiaohongshu\.com\/[^;)]+/))
       }
     }
   }
@@ -44,16 +49,29 @@ async function scrapeUGCItemFromXHS(itemId){
     stats:{likes:stats[0],comments:stats[1],stars:stats[2]},
     posted: postedDate? postedDate[0] : undefined,
     type: videoSrc? 'video' : (pics && pics.length)? 'normal' : undefined,
-    src: videoSrc? videoSrc : imageSrc.length? imageSrc : undefined
+    src: videoSrc? videoSrc : imageSrc.length? imageSrc : undefined,
+    tags
   }
 
-  console.log(note)
-
-  const creator = $('.card-note .right-card');
+  const creatorName = $('.right .name').text();
+  const creatorProfilePic = $('.author-item .left-img').children('img').attr('src');
+  const creatorStats = $('.card-info').text().split(' ').reduce((prev,cur,index,arr) => {
+    if(index%2){
+      prev[arr[index-1]] = cur;
+    }
+    return prev; 
+  },{});
+  const creator = {
+    name:creatorName,
+    profilePic:creatorProfilePic,
+    stats:creatorStats
+  }
   
 }
 
-scrapeUGCItemFromXHS('5f057ced00000000010008d4');
+scrapeUGCItemFromXHS('5f0302ca0000000001002f1a');
 //5f059940000000000101ee43 video
 //5f0576d70000000001003108
 // 5f02fd5e0000000001006183 video
+// 5f0594b600000000010068e3 video
+// 5f0302ca0000000001002f1a
