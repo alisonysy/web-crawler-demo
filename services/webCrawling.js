@@ -2,9 +2,10 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 const HTTPError = require('../errors/HTTPError');
-const Post_XHS = require('../models/post_XHS');
+const DbError = require('../errors/DbError');
+const Post_xhs = require('../models/post_XHS');
 
-const {cssUrlToImgSrc,appendBaseUrl} = require('../utils/urlHandling');
+const {cssUrlToImgSrc,appendBaseUrl,extractIdFromUrl} = require('../utils/urlHandling');
 
 class Tag{
   constructor(name,val,score,src){
@@ -36,7 +37,9 @@ async function scrapeUGCItemFromXHS(itemId){
   let tags = [];
   if(tagField.length){
     for(let i=0;i < tagField.length; i++){
-      tags.push({name:$(tagField[i]).text().trim(), href:appendBaseUrl($(tagField[i]).attr('href'),'https://www.xiaohongshu.com')});
+      let href = $(tagField[i]).attr('href');
+      let t = new Tag($(tagField[i]).text().trim(),extractIdFromUrl(href,/tags\/(.+)\?name/),1,appendBaseUrl(href,'https://www.xiaohongshu.com'));
+      tags.push(t);
     }
   }
 
@@ -78,7 +81,7 @@ async function scrapeUGCItemFromXHS(itemId){
     stats:creatorStats
   }
 
-  return await Post_XHS.model.findOneAndUpdate({
+  return await Post_xhs.model.updateOne({
     id_XHS:itemId
   },{
     title:note.title,
@@ -88,15 +91,18 @@ async function scrapeUGCItemFromXHS(itemId){
     tags:note.tags,
     posted:note.posted
   },{
-    new:true,
     upsert:true
+  },(err,res) => {
+    if(err) throw new DbError(404,err,4040001,'cannot insert or update the post to database');
+    console.log('Insert or update successfully.');
   })
   
 }
 
-scrapeUGCItemFromXHS('5f0302ca0000000001002f1a');
+scrapeUGCItemFromXHS('5f059940000000000101ee43');
 //5f059940000000000101ee43 video
 //5f0576d70000000001003108
 // 5f02fd5e0000000001006183 video
 // 5f0594b600000000010068e3 video
 // 5f0302ca0000000001002f1a
+// 5ebf55cc00000000010021e1

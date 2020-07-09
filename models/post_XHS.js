@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const tagSchema = new Schema({
+  name:String,
+  value:String,
+  score:String,
+  src:String
+})
+
 const postSchema = new Schema({
   id_XHS:String,
   title: String,
@@ -19,18 +26,15 @@ const postSchema = new Schema({
     type:Map,
     of:String
   },
-  tags: [{
-    name:String,
-    href:String
-  }],
+  tags: [tagSchema],
   posted: {
     type: Date,
     default: Date.now
   }
 });
 
-const post_XHSModel = mongoose.model('post_XHS',postSchema);
+const post_xhsModel = mongoose.model('post_xhs',postSchema);
 
 module.exports = {
-  model:post_XHSModel
+  model:post_xhsModel
 }

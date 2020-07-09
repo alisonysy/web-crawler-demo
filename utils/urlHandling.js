@@ -17,8 +17,18 @@ function appendBaseUrl(partialUrl,baseUrl){
   return baseUrl + partialUrl;
 }
 
+function extractIdFromUrl(url,matchRegExp){
+  let result = url.match(matchRegExp);
+  if(result && result[1]){
+    return result[1];
+  }else{
+    throw new Error('Cannot match ID.')
+  }
+}
+
 module.exports = {
   thumbUrlToImgSrc,
   cssUrlToImgSrc,
-  appendBaseUrl
+  appendBaseUrl,
+  extractIdFromUrl
 }
