@@ -2,8 +2,18 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 const HTTPError = require('../errors/HTTPError');
+const Post_XHS = require('../models/post_XHS');
 
 const {cssUrlToImgSrc,appendBaseUrl} = require('../utils/urlHandling');
+
+class Tag{
+  constructor(name,val,score,src){
+    this.name = name;
+    this.value = val;
+    this.score = score;
+    this.src = src;
+  }
+}
 
 async function scrapeUGCItemFromXHS(itemId){
   const url = `https://www.xiaohongshu.com/discovery/item/${itemId}`;
@@ -45,6 +55,7 @@ async function scrapeUGCItemFromXHS(itemId){
   }
 
   const note = {
+    id_XHS:itemId,
     title, noteContent, 
     stats:{likes:stats[0],comments:stats[1],stars:stats[2]},
     posted: postedDate? postedDate[0] : undefined,
@@ -66,6 +77,20 @@ async function scrapeUGCItemFromXHS(itemId){
     profilePic:creatorProfilePic,
     stats:creatorStats
   }
+
+  return await Post_XHS.model.findOneAndUpdate({
+    id_XHS:itemId
+  },{
+    title:note.title,
+    author:creator,
+    mediaContent:note.src,
+    statistics:note.stats,
+    tags:note.tags,
+    posted:note.posted
+  },{
+    new:true,
+    upsert:true
+  })
   
 }
 
