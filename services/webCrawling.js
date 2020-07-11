@@ -1,3 +1,4 @@
+require('./mongooseService');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
@@ -16,18 +17,21 @@ class Tag{
   }
 }
 
-async function scrapeUGCItemFromXHS(itemId){
+let postNumToFetchPerRound = 5;
+let postHrefToFetch = [];
+async function scrapePostItemFromXHS(itemId){
   const url = `https://www.xiaohongshu.com/discovery/item/${itemId}`;
   const res = await axios.get(url)
     .catch( e => {
-      if(e.response && e.response.status && e.response.status === 404){
-        throw new HTTPError(404, e.response, 4040000, 'Resource not found.');
-      }else{
-        throw e;
-      }
-    });
+    if(e.response && e.response.status && e.response.status === 404){
+      throw new HTTPError(404, e.response, 4040000, 'Resource not found.');
+    }else{
+      throw e;
+    }
+  }).catch( () => process.exit(1));
   const data = res.data;
   const $ = cheerio.load(data);
+  postNumToFetchPerRound--;
 
   const title = $('.note-top .title').text().trim();
   const noteContent = $('.note-top + div .content').html();
@@ -79,7 +83,18 @@ async function scrapeUGCItemFromXHS(itemId){
     name:creatorName,
     profilePic:creatorProfilePic,
     stats:creatorStats
-  }
+  };
+
+  const relatedPosts = $('.panel-list').children();
+  if(relatedPosts.length){
+    for(let i=0;i < relatedPosts.length; i++){
+      if(postHrefToFetch.length<postNumToFetchPerRound){
+        postHrefToFetch.push(extractIdFromUrl($(relatedPosts[i]).attr('href'),/item\/(.+)/))
+      }else{
+        break;
+      }
+    }
+  };
 
   return await Post_xhs.model.updateOne({
     id_XHS:itemId
@@ -89,20 +104,19 @@ async function scrapeUGCItemFromXHS(itemId){
     mediaContent:note.src,
     statistics:note.stats,
     tags:note.tags,
-    posted:note.posted
+    posted:note.posted,
+    noteContent:note.noteContent
   },{
     upsert:true
   },(err,res) => {
     if(err) throw new DbError(404,err,4040001,'cannot insert or update the post to database');
     console.log('Insert or update successfully.');
+    if(postHrefToFetch.length && postNumToFetchPerRound){
+      console.log('-------posts left to fetch---------',postHrefToFetch);
+      scrapePostItemFromXHS(postHrefToFetch.pop());
+    }
   })
   
 }
 
-scrapeUGCItemFromXHS('5f059940000000000101ee43');
-//5f059940000000000101ee43 video
-//5f0576d70000000001003108
-// 5f02fd5e0000000001006183 video
-// 5f0594b600000000010068e3 video
-// 5f0302ca0000000001002f1a
-// 5ebf55cc00000000010021e1
+scrapePostItemFromXHS('5f06aecf000000000101cff5');

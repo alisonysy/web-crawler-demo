@@ -21,6 +21,7 @@ const postSchema = new Schema({
       return typeof v === 'string' || v instanceof Array;
     }
   },
+  noteContent: String,
   type:String,
   statistics:{
     type:Map,
