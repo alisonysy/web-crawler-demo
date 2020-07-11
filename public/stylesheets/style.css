@@ -10,6 +10,11 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+.margin_center{
+  margin-left: auto;
+  margin-right: auto;
+}
+
 a {
   color: #ff2442;
 }
@@ -18,7 +23,7 @@ a {
   color:#ff2442;
 }
 
-.btn{
+.btn, .bg-theme-color{
   background-color: #ff2442;
   color:#fff;
 }
@@ -40,9 +45,4 @@ a {
   100%{
     transform: translateY(-40px);
   }
-}
-
-[name="numberToFetch"]{
-  margin-left: auto;
-  margin-right: auto;
 }

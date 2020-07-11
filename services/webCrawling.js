@@ -17,9 +17,7 @@ class Tag{
   }
 }
 
-let postNumToFetchPerRound = 5;
-let postHrefToFetch = [];
-async function scrapePostItemFromXHS(itemId){
+async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
   const url = `https://www.xiaohongshu.com/discovery/item/${itemId}`;
   const res = await axios.get(url)
     .catch( e => {
@@ -28,10 +26,13 @@ async function scrapePostItemFromXHS(itemId){
     }else{
       throw e;
     }
-  }).catch( () => process.exit(1));
+  }).catch( (e) => {
+    console.log(e);
+    process.exit(1);
+  });
   const data = res.data;
   const $ = cheerio.load(data);
-  postNumToFetchPerRound--;
+  nums--;
 
   const title = $('.note-top .title').text().trim();
   const noteContent = $('.note-top + div .content').html();
@@ -88,7 +89,7 @@ async function scrapePostItemFromXHS(itemId){
   const relatedPosts = $('.panel-list').children();
   if(relatedPosts.length){
     for(let i=0;i < relatedPosts.length; i++){
-      if(postHrefToFetch.length<postNumToFetchPerRound){
+      if(postHrefToFetch.length<nums){
         postHrefToFetch.push(extractIdFromUrl($(relatedPosts[i]).attr('href'),/item\/(.+)/))
       }else{
         break;
@@ -111,12 +112,39 @@ async function scrapePostItemFromXHS(itemId){
   },(err,res) => {
     if(err) throw new DbError(404,err,4040001,'cannot insert or update the post to database');
     console.log('Insert or update successfully.');
-    if(postHrefToFetch.length && postNumToFetchPerRound){
+    cb(nums);
+    if(postHrefToFetch.length && nums){
       console.log('-------posts left to fetch---------',postHrefToFetch);
-      scrapePostItemFromXHS(postHrefToFetch.pop());
+      scrapePostItemFromXHS(postHrefToFetch.pop(),nums,postHrefToFetch,cb);
     }
   })
   
 }
 
-scrapePostItemFromXHS('5f06aecf000000000101cff5');
+async function generateRandomItem(){
+  return await Post_xhs.model.find({},{id_XHS:1},{limit:200})
+    .then((res) => {
+      if(!res.length) throw res;
+      let rand = Math.random()*(res.length-1);
+      return res[Math.ceil(rand)];
+    }).catch( e => {
+      throw new DbError(404,e,4040002,'cannot find any matching results.')
+    })
+}
+
+async function scrapePostItemsFromXHS(postNumberToFetch,callback){
+  let nums = postNumberToFetch;
+  let postHrefToFetch = [];
+  
+  let randId = await generateRandomItem();
+  scrapePostItemFromXHS(randId.id_XHS, nums,postHrefToFetch,(nums) => {
+    console.log('-----nums------',nums);
+    callback(nums);
+  });
+}
+
+// scrapePostItemFromXHS('5f06aecf000000000101cff5');
+module.exports={
+  scrapePostItemFromXHS,
+  scrapePostItemsFromXHS
+}

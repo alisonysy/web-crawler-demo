@@ -8,7 +8,12 @@ const esNodeConfig = {
   requestTimeout:10000
 }
 
+const fetchingConfig = {
+  max:300
+}
+
 module.exports = {
   db,
-  esNodeConfig
+  esNodeConfig,
+  fetchingConfig
 }
