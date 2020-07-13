@@ -146,9 +146,16 @@ function countDbItems(cb){
   return Post_xhs.model.countAll(c => cb(c));
 }
 
+function outputAndCountTagsByName(){
+  const aggregate=Post_xhs.model.aggregate([[{$unwind:"$tags"},{$unwind:"$tags.name"},{$group:{_id:"$tags.name",count:{$sum:1}}}]]);
+  aggregate.sort({count:-1}).limit(30);
+  return aggregate.exec();
+}
+
 // scrapePostItemFromXHS('5f06aecf000000000101cff5');
 module.exports={
   scrapePostItemFromXHS,
   scrapePostItemsFromXHS,
-  countDbItems
+  countDbItems,
+  outputAndCountTagsByName
 }

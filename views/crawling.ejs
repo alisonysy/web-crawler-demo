@@ -14,12 +14,25 @@
       <svg class="icon downarrow" aria-hidden="true">
         <use xlink:href="#icon-downarrow"></use>
       </svg>
+      <% if(progress) { %>
       <div class="progress bg-theme-color col-lg-10 col-md-8 col-sm-8 col-10 margin_center">
         <div class="progress-bar bg-theme-color" role="progressbar" style="width: <%= progress %>%;" aria-valuenow="<%= progress %>" aria-valuemin="0" aria-valuemax="100"><%= progress %>%</div>
       </div>
+      <% } %>
+      <% if(tags && tags.length){ %>
+      <ul class="list-group list-group-horizontal-sm justify-content-center">
+        <% tags.forEach(function(t){ %>
+          <li class="rounded-lg border border-xhs d-inline mr-1 mb-1 mr-md-3 mb-md-3 p-1 p-md-2">
+            <%= t %>
+          </li>
+        <% }); %>
+      </ul>
+      <% } %>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <% if(progress){ %>
     <script src="/javascripts/ajax.js" type="module"></script>
+    <% } %>
     <!-- 
           <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>

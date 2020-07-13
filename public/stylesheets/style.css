@@ -46,3 +46,12 @@ a {
     transform: translateY(-40px);
   }
 }
+
+/* crawling */
+.list-group{
+  flex-flow: row wrap;
+}
+
+.border-xhs{
+  border:1px solid #ff2442;
+}
