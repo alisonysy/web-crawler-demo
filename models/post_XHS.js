@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const {DbError} = require('../errors/DbError');
 
 const tagSchema = new Schema({
   name:String,
@@ -33,6 +34,13 @@ const postSchema = new Schema({
     default: Date.now
   }
 });
+
+postSchema.statics.countAll = function(cb){
+  this.countDocuments({},(err,c) => {
+    if(err) throw new DbError(500,err,5000001,'Error counting items in database');
+    cb(c);
+  });
+}
 
 const post_xhsModel = mongoose.model('post_xhs',postSchema);
 

@@ -138,13 +138,17 @@ async function scrapePostItemsFromXHS(postNumberToFetch,callback){
   
   let randId = await generateRandomItem();
   scrapePostItemFromXHS(randId.id_XHS, nums,postHrefToFetch,(nums) => {
-    console.log('-----nums------',nums);
     callback(nums);
   });
+}
+
+function countDbItems(cb){
+  return Post_xhs.model.countAll(c => cb(c));
 }
 
 // scrapePostItemFromXHS('5f06aecf000000000101cff5');
 module.exports={
   scrapePostItemFromXHS,
-  scrapePostItemsFromXHS
+  scrapePostItemsFromXHS,
+  countDbItems
 }

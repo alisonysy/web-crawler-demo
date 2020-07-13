@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const {fetchingConfig} = require('../api.config');
-const {scrapePostItemsFromXHS} = require('../services/webCrawling');
+const {scrapePostItemsFromXHS,countDbItems} = require('../services/webCrawling');
 
 /* GET crawling page. */
 let progress = 0;
@@ -26,5 +26,31 @@ router.get('/progress',function(req,res,next){
   res.json(progress);
   res.end();
 });
+
+router.get('/result',function(req,res,next){
+  // need to search thru db to see if there's any result
+  console.log(req.params,req.query);
+  countDbItems((c) => {
+    if(!c){
+      res.status(404);
+      next('Sorry, there\'s no record in database.');
+    };
+    const q = req.query;
+    for (const key in q) {
+      if (q.hasOwnProperty(key) && key === 'tag') {
+        switch(q[key]){
+          case 'all':
+            console.log('all tags number is',c);
+            break;
+          default:
+            console.log('here should handle other tags')
+            break;
+        }
+      }
+    }
+    next();
+  })
+  
+})
 
 module.exports = router;
