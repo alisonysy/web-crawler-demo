@@ -9,10 +9,13 @@ const {
   getPostGeneralWithLimit,
   getPostsWithLimit
 } = require('../services/webCrawling');
+const {extractIdFromUrl} = require('../utils/urlHandling');
+const fs = require('fs');
+const path = require('path');
 
 const crawlingPageRenderObj = {
   title:'Xiaohongshu Crawling and Searching',
-  slogan:'Start to fetch posts from Xiaohongshu',
+  slogan:'Fetching posts from Xiaohongshu',
   progress:undefined,
   tags:undefined,
   posts:undefined
@@ -21,9 +24,13 @@ const crawlingPageRenderObj = {
 /* GET crawling page. */
 let progress = 0;
 router.get('/', function(req, res, next) {
-  let {numberToFetch} = req.query;
+  let {numberToFetch,postUrl} = req.query;
 
-  scrapePostItemsFromXHS(+numberToFetch,(left) => {
+  if(postUrl.length > 0){
+    postUrl = extractIdFromUrl(postUrl,/item\/(.+)/);
+  }
+
+  scrapePostItemsFromXHS(+numberToFetch,postUrl,(left) => {
     progress = (numberToFetch - left) / numberToFetch;
     console.log('-------progress is------',progress);
   });
@@ -53,9 +60,11 @@ router.get('/result',function(req,res,next){
           .then((re) => {
             re = re.map(t => t._id);
             console.log(re);
-            getPostGeneralWithLimit(30)
+            getPostGeneralWithLimit(fetchingConfig.postNumberPerPage)
               .then((posts) => {
+                let arr = [];
                 posts = posts.map( p => {
+                  arr.push(p.id_XHS);
                   return {
                     title:p.title,
                     cover: p.type === 'video'? p.mediaContent[1] : p.mediaContent[0],
@@ -64,9 +73,10 @@ router.get('/result',function(req,res,next){
                     likes:p.statistics.get('likes')
                   }
                 });
-                console.log('all posts are------',posts)
+                console.log('all xhs ids------',arr);
                 res.render('crawling',{
                   ...crawlingPageRenderObj,
+                  slogan:'Posts that you might be interested in',
                   tags:re,
                   posts:posts
                 })
@@ -84,7 +94,14 @@ router.get('/result',function(req,res,next){
   })
 });
 
-
+router.post('/load',async function(req,res,next){
+  const l = req.body;
+  let re = await getPostGeneralWithLimit(l.limit? l.limit : 20);
+  let arr = [];
+  re.forEach( p => arr.push(p.id_XHS));
+  console.log('all xhs ids 2-----',arr);
+  res.json(re);
+});
 
 
 module.exports = router;

@@ -5,6 +5,9 @@
     <div class="card-author">
       <img src="<%= p.profilePic %>" alt="author profile picture" style="width:40px" class="rounded-circle" />
       <span class="card-author_name"><%= p.author %></span>
+      <svg class="icon likes" aria-hidden="true">
+        <use xlink:href="#icon-Heart"></use>
+      </svg>
       <span class="card-post_likes"><%= p.likes %></span>
     </div>
   </div>

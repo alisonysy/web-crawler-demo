@@ -69,3 +69,9 @@ a {
 .wid-250px{
   width:250px;
 }
+
+.likes{
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}

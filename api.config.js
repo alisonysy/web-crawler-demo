@@ -9,7 +9,8 @@ const esNodeConfig = {
 }
 
 const fetchingConfig = {
-  max:300
+  max:300,
+  postNumberPerPage:25,
 }
 
 module.exports = {

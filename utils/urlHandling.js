@@ -22,7 +22,7 @@ function extractIdFromUrl(url,matchRegExp){
   if(result && result[1]){
     return result[1];
   }else{
-    throw new Error('Cannot match ID.')
+    return '';
   }
 }
 

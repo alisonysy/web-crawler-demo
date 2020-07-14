@@ -91,7 +91,8 @@ async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
   if(relatedPosts.length){
     for(let i=0;i < relatedPosts.length; i++){
       if(postHrefToFetch.length<nums){
-        postHrefToFetch.push(extractIdFromUrl($(relatedPosts[i]).attr('href'),/item\/(.+)/))
+        postHrefToFetch.push(extractIdFromUrl($(relatedPosts[i]).attr('href'),/item\/(.+)/));
+        postHrefToFetch.filter( i => i.length > 0);
       }else{
         break;
       }
@@ -136,12 +137,12 @@ async function generateRandomItem(){
     })
 }
 
-async function scrapePostItemsFromXHS(postNumberToFetch,callback){
+async function scrapePostItemsFromXHS(postNumberToFetch,postUrl,callback){
   let nums = postNumberToFetch;
   let postHrefToFetch = [];
   
   let randId = await generateRandomItem();
-  scrapePostItemFromXHS(randId.id_XHS, nums,postHrefToFetch,(nums) => {
+  scrapePostItemFromXHS(postUrl.length>0? postUrl : randId.id_XHS, nums,postHrefToFetch,(nums) => {
     callback(nums);
   });
 }
@@ -156,8 +157,14 @@ function outputAndCountTagsByName(){
   return aggregate.exec();
 }
 
+let currentPage = 0;
+let postsFetched = 0;
 function getPostGeneralWithLimit(l){
-  return Post_xhs.model.find({},{id_XHS:1,title:1,author:1,mediaContent:1,statistics:1,type:1}).limit(l).exec();
+  console.log('fetching limit is',l);
+  postsFetched = currentPage === 0? (l+postsFetched) : (currentPage*l+postsFetched);
+  currentPage++;
+  console.log('should skip-----',postsFetched);
+  return Post_xhs.model.find({},{id_XHS:1,title:1,author:1,mediaContent:1,statistics:1,type:1},{skip:postsFetched}).limit(l).exec();
 }
 
 function getPostsWithLimit(l){

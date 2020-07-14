@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel='stylesheet' href='/stylesheets/style.css' />
-    <script src="//at.alicdn.com/t/font_1937663_fzu1bqjutc.js"></script>
+    <script src="//at.alicdn.com/t/font_1937663_8riaxidax5q.js"></script>
   </head>
   <body>
     <div class="container-fluid text-center">
@@ -16,7 +16,14 @@
       </svg>
       <form action="/crawling">
         <div class="form-group">
-          <label for="numberToFetch">Enter the number of posts to fetch at a time:</label>
+          <label for="postUrl">Give me an address of post that interests you from Xiaohongshu:</label>
+          <input type="text" name="postUrl" id="postUrl" class="form-control col-10 col-sm-8 col-md-8 col-lg-8 margin_center" />
+          <small class="form-text text-muted">
+            Format: https://www.xiaohongshu.com/discovery/item/5f0d31b7000000000101e641
+          </small>
+        </div>
+        <div class="form-group">
+          <label for="numberToFetch">Number of posts to fetch at a time:</label>
           <input type="number" name="numberToFetch" id="numberToFetch" class="form-control col-10 col-sm-8 col-md-8 col-lg-8 margin_center" />
           <small class="form-text text-muted">
             The max number of posts to fetch at a time is 300.
