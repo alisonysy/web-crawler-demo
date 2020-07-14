@@ -17,17 +17,11 @@
 
   function updateProgress(p){
     let bar = document.querySelector('.progress-bar');
-    bar.setAttribute("style","width:"+ p*100 + '%');
-    bar.textContent = p*100 + '%';
+    bar.setAttribute("style","width:"+ (p*100) + '%');
+    console.log((p*100).toFixed(2));
+    bar.textContent = (p*100).toFixed(2) + '%';
     if(p===1){
-      axios.get('/crawling/result?tag=all')
-        .then( r => {
-
-        }).catch( e => {
-          // error handling
-          console.log('----fetching /crawling/result failed-----',e)
-        })
-        
+      window.location.href="http://localhost:3000/crawling/result?tag=all";
     }
   }
 })();

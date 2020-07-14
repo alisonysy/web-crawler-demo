@@ -49,6 +49,7 @@ async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
   }
 
   const videoSrc = $('.videoframe video').attr('src');
+  const videoPoster = videoSrc? $('.videoframe video').attr('poster') : null;
   const pics = $('.carousel .slide').children();
   let imageSrc;
   if(!videoSrc && pics.length){
@@ -68,7 +69,7 @@ async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
     stats:{likes:stats[0],comments:stats[1],stars:stats[2]},
     posted: postedDate? postedDate[0] : undefined,
     type: videoSrc? 'video' : (pics && pics.length)? 'normal' : undefined,
-    src: videoSrc? videoSrc : imageSrc.length? imageSrc : undefined,
+    src: videoSrc? [videoSrc,videoPoster] : imageSrc.length? imageSrc : undefined,
     tags
   }
 
@@ -106,7 +107,8 @@ async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
     statistics:note.stats,
     tags:note.tags,
     posted:note.posted,
-    noteContent:note.noteContent
+    noteContent:note.noteContent,
+    type:note.type
   },{
     upsert:true
   },(err,res) => {
@@ -124,7 +126,9 @@ async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
 async function generateRandomItem(){
   return await Post_xhs.model.find({},{id_XHS:1},{limit:200})
     .then((res) => {
-      if(!res.length) throw res;
+      if(!res.length){
+        return {id_XHS:'5f0bd52a000000000100617a'};
+      };
       let rand = Math.random()*(res.length-1);
       return res[Math.ceil(rand)];
     }).catch( e => {
@@ -152,10 +156,26 @@ function outputAndCountTagsByName(){
   return aggregate.exec();
 }
 
+function getPostGeneralWithLimit(l){
+  return Post_xhs.model.find({},{id_XHS:1,title:1,author:1,mediaContent:1,statistics:1,type:1}).limit(l).exec();
+}
+
+function getPostsWithLimit(l){
+  return Post_xhs.model.find({}).limit(l).exec();
+}
+
+function getPostsByTagName(tag){
+  const query = Post_xhs.model.find({"tags.name":tag});
+  return query.exec();
+}
+
 // scrapePostItemFromXHS('5f06aecf000000000101cff5');
 module.exports={
   scrapePostItemFromXHS,
   scrapePostItemsFromXHS,
   countDbItems,
-  outputAndCountTagsByName
+  outputAndCountTagsByName,
+  getPostsByTagName,
+  getPostGeneralWithLimit,
+  getPostsWithLimit
 }

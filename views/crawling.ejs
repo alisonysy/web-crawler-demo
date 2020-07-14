@@ -14,8 +14,8 @@
       <svg class="icon downarrow" aria-hidden="true">
         <use xlink:href="#icon-downarrow"></use>
       </svg>
-      <% if(progress) { %>
-      <div class="progress bg-theme-color col-lg-10 col-md-8 col-sm-8 col-10 margin_center">
+      <% if(progress || progress=== 0) { %>
+      <div class="progress p-0 col-lg-10 col-md-8 col-sm-8 col-10 margin_center">
         <div class="progress-bar bg-theme-color" role="progressbar" style="width: <%= progress %>%;" aria-valuenow="<%= progress %>" aria-valuemin="0" aria-valuemax="100"><%= progress %>%</div>
       </div>
       <% } %>
@@ -28,9 +28,16 @@
         <% }); %>
       </ul>
       <% } %>
+      <% if(posts && posts.length){ %>
+        <ul class="post-card-group">
+          <% posts.forEach(function(p){ %>
+          <%- include('card',{p:p}) %>
+          <% }); %>
+        </ul>
+      <% } %>      
     </div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <% if(progress){ %>
+    <% if(progress || progress === 0){ %>
     <script src="/javascripts/ajax.js" type="module"></script>
     <% } %>
     <!-- 

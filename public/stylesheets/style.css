@@ -55,3 +55,17 @@ a {
 .border-xhs{
   border:1px solid #ff2442;
 }
+
+.post-card-group{
+  -moz-column-count:5;
+  -webkit-column-count:5;
+  column-count: 5;
+  -moz-column-gap:2.5em;
+  -webkit-column-gap:2.5em;
+  column-gap: 2.5em;
+}
+
+/* card.ejs */
+.wid-250px{
+  width:250px;
+}
