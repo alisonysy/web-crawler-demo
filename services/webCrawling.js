@@ -18,6 +18,7 @@ class Tag{
 }
 
 async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
+  console.log('item id to fetch is-----',itemId);
   const url = `https://www.xiaohongshu.com/discovery/item/${itemId}`;
   const res = await axios.get(url)
     .catch( e => {
@@ -91,8 +92,8 @@ async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
   if(relatedPosts.length){
     for(let i=0;i < relatedPosts.length; i++){
       if(postHrefToFetch.length<nums){
-        postHrefToFetch.push(extractIdFromUrl($(relatedPosts[i]).attr('href'),/item\/(.+)/));
-        postHrefToFetch.filter( i => i.length > 0);
+        let p = extractIdFromUrl($(relatedPosts[i]).attr('href'),/item\/(.+)/);
+        p.length > 0 && postHrefToFetch.push(p);
       }else{
         break;
       }
@@ -117,7 +118,11 @@ async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
     console.log('Insert or update successfully.');
     cb(nums);
     if(postHrefToFetch.length && nums){
-      console.log('-------posts left to fetch---------',postHrefToFetch);
+      let temp =[];
+      postHrefToFetch.forEach( p => {
+        if(temp.indexOf(p) === -1) temp.push(p);
+      });
+      postHrefToFetch = temp;
       scrapePostItemFromXHS(postHrefToFetch.pop(),nums,postHrefToFetch,cb);
     }
   })
@@ -157,14 +162,12 @@ function outputAndCountTagsByName(){
   return aggregate.exec();
 }
 
-let currentPage = 0;
 let postsFetched = 0;
+let postsToSkip = 0;
 function getPostGeneralWithLimit(l){
-  console.log('fetching limit is',l);
-  postsFetched = currentPage === 0? (l+postsFetched) : (currentPage*l+postsFetched);
-  currentPage++;
-  console.log('should skip-----',postsFetched);
-  return Post_xhs.model.find({},{id_XHS:1,title:1,author:1,mediaContent:1,statistics:1,type:1},{skip:postsFetched}).limit(l).exec();
+  postsToSkip = postsFetched;
+  postsFetched = l+postsToSkip;
+  return Post_xhs.model.find({},{id_XHS:1,title:1,author:1,mediaContent:1,statistics:1,type:1},{skip:postsToSkip}).limit(l).exec();
 }
 
 function getPostsWithLimit(l){

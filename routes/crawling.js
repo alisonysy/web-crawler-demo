@@ -73,7 +73,7 @@ router.get('/result',function(req,res,next){
                     likes:p.statistics.get('likes')
                   }
                 });
-                console.log('all xhs ids------',arr);
+                // console.log('all xhs ids------',arr);
                 res.render('crawling',{
                   ...crawlingPageRenderObj,
                   slogan:'Posts that you might be interested in',
@@ -99,7 +99,7 @@ router.post('/load',async function(req,res,next){
   let re = await getPostGeneralWithLimit(l.limit? l.limit : 20);
   let arr = [];
   re.forEach( p => arr.push(p.id_XHS));
-  console.log('all xhs ids 2-----',arr);
+  // console.log('all xhs ids 2-----',arr);
   res.json(re);
 });
 
