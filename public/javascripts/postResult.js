@@ -36,14 +36,11 @@
     let authorName = document.createElement('span');
     authorName.classList.add('card-author_name');
     authorName.textContent = data.author.name;
-    let svg = document.createElement('svg');
-    svg.classList.add('icon','likes');
-    svg.innerHTML = '<use xlink:href="#icon-Heart"></use>';
     let postLikes = document.createElement('span');
     postLikes.classList.add('card-post_likes');
     postLikes.textContent = data.statistics.likes;
     cardAuthor
-      .append(authorImg,authorName,svg,postLikes);
+      .append(authorImg,authorName,postLikes);
     cardBody
       .append(cardTitle,cardAuthor);
     cardWrapper
