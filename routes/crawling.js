@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-const {fetchingConfig} = require('../api.config');
 const {
   scrapePostItemsFromXHS,
   countDbItems,
@@ -32,7 +31,6 @@ router.get('/', function(req, res, next) {
 
   scrapePostItemsFromXHS(+numberToFetch,postUrl,(left) => {
     progress = (numberToFetch - left) / numberToFetch;
-    console.log('-------progress is------',progress);
   });
   
   res.render('crawling',{
@@ -48,7 +46,10 @@ router.get('/progress',function(req,res,next){
 
 router.get('/result',function(req,res,next){
   // need to search thru db to see if there's any result
-  console.log(req.params,req.query);
+  // console.log(req.params,req.query);
+  const cookiePage = +req.cookies.viewed || 0;
+  console.log(req.cookies.viewed);
+  res.viewPage = cookiePage;
   countDbItems((c) => {
     if(!c){
       next('Sorry, there\'s no record in database.');
@@ -59,9 +60,11 @@ router.get('/result',function(req,res,next){
         outputAndCountTagsByName()
           .then((re) => {
             re = re.map(t => t._id);
-            console.log(re);
-            getPostGeneralWithLimit(fetchingConfig.postNumberPerPage)
+            getPostGeneralWithLimit(res.viewPage)
               .then((posts) => {
+                res.viewPage+=1;
+                res.cookie('viewed',res.viewPage,{maxAge:60*60*1000,path:'/crawling'})
+                console.log('session viewpage num',res.viewPage);
                 let arr = [];
                 posts = posts.map( p => {
                   arr.push(p.id_XHS);
@@ -84,8 +87,10 @@ router.get('/result',function(req,res,next){
               .catch(postError => console.log('get post with limit failed',postError))
           }).catch( e => console.log('/result?tag=all error',e))
       }else{
-        getPostsByTagName(q.tag)
+        getPostGeneralWithLimit(res.viewPage,{"tags.name":q.tag})
           .then((re) => {
+            res.viewPage+=1;
+            res.cookie('viewed',res.viewPage,{maxAge:60*60*1000,path:'/crawling'});
             console.log('get other tags data',re);
             res.json(re);
           }).catch( e => console.log('/result?tag=others error',e))
@@ -95,8 +100,11 @@ router.get('/result',function(req,res,next){
 });
 
 router.post('/load',async function(req,res,next){
-  const l = req.body;
-  let re = await getPostGeneralWithLimit(l.limit? l.limit : 20);
+  console.log('/load------',req.cookies.viewed)
+  const {limit,page} = req.body;
+  let re = await getPostGeneralWithLimit(page);
+  res.viewPage+=1;
+  res.cookie('viewed',res.viewPage,{maxAge:60*60*1000,path:'/crawling'})
   let arr = [];
   re.forEach( p => arr.push(p.id_XHS));
   // console.log('all xhs ids 2-----',arr);

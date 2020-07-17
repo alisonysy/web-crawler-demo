@@ -1,8 +1,11 @@
 (function(){
   let btn = document.getElementById('btnLoadMore');
+  let viewingPage = window.getCookie('viewed') || 0;
+  console.log('viewed cookies-----',viewingPage);
   btn.addEventListener('click',function(){
     axios.post('/crawling/load',{
-      limit:10
+      limit:10,
+      page:viewingPage
     }).then((res) => {
       console.log('loading more content successfully',res)
       let posts = res.data;

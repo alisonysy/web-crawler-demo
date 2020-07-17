@@ -65,6 +65,28 @@ a {
   column-gap: 2.5em;
 }
 
+@media screen and (max-width:1025px){
+  .post-card-group{
+    -moz-column-count:3;
+    -webkit-column-count:3;
+    column-count: 3;
+    -moz-column-gap:1.6em;
+    -webkit-column-gap:1.6em;
+    column-gap: 1.6em;
+  }
+}
+
+@media screen and (max-width:500px){
+  .post-card-group{
+    -moz-column-count:1;
+    -webkit-column-count:1;
+    column-count: 1;
+    -moz-column-gap:1.3em;
+    -webkit-column-gap:1.3em;
+    column-gap: 1.3em;
+  }
+}
+
 /* card.ejs */
 .wid-250px{
   width:250px;

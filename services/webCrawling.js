@@ -5,6 +5,7 @@ const cheerio = require('cheerio');
 const HTTPError = require('../errors/HTTPError');
 const DbError = require('../errors/DbError');
 const Post_xhs = require('../models/post_XHS');
+const {fetchingConfig} = require('../api.config');
 
 const {cssUrlToImgSrc,appendBaseUrl,extractIdFromUrl} = require('../utils/urlHandling');
 
@@ -18,7 +19,7 @@ class Tag{
 }
 
 async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
-  console.log('item id to fetch is-----',itemId);
+  // console.log('item id to fetch is-----',itemId);
   const url = `https://www.xiaohongshu.com/discovery/item/${itemId}`;
   const res = await axios.get(url)
     .catch( e => {
@@ -115,7 +116,7 @@ async function scrapePostItemFromXHS(itemId,nums,postHrefToFetch,cb){
     upsert:true
   },(err,res) => {
     if(err) throw new DbError(404,err,4040001,'cannot insert or update the post to database');
-    console.log('Insert or update successfully.');
+    // console.log('Insert or update successfully.');
     cb(nums);
     if(postHrefToFetch.length && nums){
       let temp =[];
@@ -162,19 +163,16 @@ function outputAndCountTagsByName(){
   return aggregate.exec();
 }
 
-let postsFetched = 0;
-let postsToSkip = 0;
-function getPostGeneralWithLimit(l){
-  postsToSkip = postsFetched;
-  postsFetched = l+postsToSkip;
-  return Post_xhs.model.find({},{id_XHS:1,title:1,author:1,mediaContent:1,statistics:1,type:1},{skip:postsToSkip}).limit(l).exec();
+function getPostGeneralWithLimit(page,condition = {}){
+  console.log('-----requesting page number is -----',page);
+  return Post_xhs.model.find(condition,{id_XHS:1,title:1,author:1,mediaContent:1,statistics:1,type:1},{skip:page*fetchingConfig.postNumberPerPage}).limit(fetchingConfig.postNumberPerPage).exec();
 }
 
 function getPostsWithLimit(l){
   return Post_xhs.model.find({}).limit(l).exec();
 }
 
-function getPostsByTagName(tag){
+function getPostsByTagName(tag,onlyShowGeneral){
   const query = Post_xhs.model.find({"tags.name":tag});
   return query.exec();
 }

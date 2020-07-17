@@ -22,9 +22,11 @@
       <% if(tags && tags.length){ %>
       <ul class="list-group list-group-horizontal-sm justify-content-center">
         <% tags.forEach(function(t){ %>
-          <li class="rounded-lg border border-xhs d-inline mr-1 mb-1 mr-md-3 mb-md-3 p-1 p-md-2">
+        <li class="rounded-lg border border-xhs d-inline mr-1 mb-1 mr-md-3 mb-md-3 p-1 p-md-2">
+          <a href="/crawling/result?tag=<%= t %>">
             <%= t %>
-          </li>
+          </a>
+        </li>
         <% }); %>
       </ul>
       <% } %>
@@ -38,6 +40,7 @@
       <% } %>      
     </div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/javascripts/utils.js"></script>
     <% if(progress || progress === 0){ %>
     <script src="/javascripts/fetchingPostProgress.js"></script>
     <% } %>
